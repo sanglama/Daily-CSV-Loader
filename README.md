@@ -1,23 +1,21 @@
-# CSV Data Loader (DuckDB)
-
-A small data pipeline that loads daily CSV files into a database and keeps the data clean.
-
-## What it does
-- Generates fake daily order files (`make_data.py`), including duplicate rows and one empty file
-- Loads each file into a staging table, keeps only the latest row per `id`, and updates the target table (`load_data.py`)
-- Skips empty files
-- Can be rerun without creating duplicates in the target table
-
-## How to run
-1. `python make_data.py` creates the CSV files
-2. `python load_data.py` loads them into `warehouse.duckdb`
-3. `python view_data.py` shows the result
-
-## Tech
-Python, DuckDB, SQL (window functions, upsert)
-
-## Data
+# make_data.py
+make_data.py
+Generates 5 fake daily order files (orders_YYYY-MM-DD.csv).
+Each file contains a few duplicate rows, and day 4 is empty on purpose.
 All data is fake.
 
-## Next steps
-Row-count checks between staging and target, pytest tests, failure alerts
+# load_data.py
+load_data.py
+Loads the daily CSV files into a DuckDB database (warehouse.duckdb).
+
+Steps for each file:
+1. Load the file into a staging table.
+2. Skip the file if it is empty.
+3. Keep only the latest row per id (ROW_NUMBER window function).
+4. Upsert the result into the target table (insert new ids, update existing).
+
+Safe to rerun: the target table never gets duplicate ids.
+
+# view_data.py
+view_data.py
+Prints all rows of the target table so you can check the result.
